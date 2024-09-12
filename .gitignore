@@ -1,0 +1,68 @@
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore virtual environment directories
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Ignore distribution/build directories
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Ignore platform-specific files (Windows, macOS, Linux)
+*.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Ignore dynamically generated files
+INFO/RECORD
+INFO/WHEEL
+
+# Ignore logs and debug output
+*.log
+*.out
+*.err
+
+# Ignore coverage results
+.coverage
+*.cover
+coverage.xml
+htmlcov/
+
+# Ignore pytest cache
+.pytest_cache/
+
+# Ignore mypy cache
+.mypy_cache/
+
+# Ignore linting output
+pylint.log
+flake8.log
+
+# Ignore documentation builds
+docs/_build/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore pyinstaller artifacts
+*.spec
+*.manifest
+*.cache
+*.o
+
+# Keep .so and .pyd files as they might be part of the compiled library amd .whl / .tar.gz packs
+!*.so
+!*.pyd
+!*.whl
+!*.tar.gz

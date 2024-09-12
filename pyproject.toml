@@ -1,0 +1,10 @@
+[build-system]
+requires = ["setuptools", "wheel", "cython"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "file_tree"
+version = "1.0.0"
+description = "This module provides the `FileTree` class to manage file directory trees."
+authors = [{name = "JeongHan Bae", email = "mastropseudo@gmail.com"}]
+dependencies = []
