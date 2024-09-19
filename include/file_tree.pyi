@@ -78,6 +78,16 @@ class FileTree:
         """
         ...
 
+    def makedirs(self) -> None:
+        """
+        Recursively create any missing directories in the file tree.
+
+        This function performs a batch operation similar to `os.makedirs` but operates on the entire tree structure, allowing for the creation of complex directory hierarchies.
+
+        :return: None
+        """
+        ...
+
     def __repr__(self) -> str:
         """
         Generate a string representation of the FileTree for debugging purposes.

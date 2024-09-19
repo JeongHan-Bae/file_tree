@@ -26,6 +26,9 @@ cdef class TreeNode:  # cdef, inner class
         return self.is_leaf
     cpdef list[TreeNode] get_children(self):
         return self.children
+    cpdef list[TreeNode] get_non_leaf_children(self):
+        # Returns all non-leaf children, i.e., subdirectories
+        return [child for child in self.children if not child.check_leaf()]
 
     def __init__(self, str name, bint is_leaf=False):
         self.children = []
@@ -56,6 +59,12 @@ cdef class TreeNode:  # cdef, inner class
     def __eq__(self, TreeNode other):
         # Check equality of TreeNodes based on their name
         return self.name == other.name
+
+    def __del__(self):
+        if self.children is not None:
+            self.children.clear()
+        if self.non_leaf_names is not None:
+            self.non_leaf_names.clear()
 
     cpdef str to_repr(self, int level = 0, tuple[int, int] depth = (0, 0)):
         # Generate a string representation of the TreeNode with optional depth control
@@ -198,7 +207,7 @@ cdef class TreeNode:  # cdef, inner class
         for line in lines[1:]:
             indent_level: int = len(line) - len(line.replace('│', '').lstrip())
             level: int = indent_level // 4  # assuming each level of indent is 4 spaces
-            line_content: str = line.strip()
+            line_content: str = line.split('#')[0].strip()  # Remove comments
 
             is_leaf = not line_content.endswith('/')
             name: str = (line_content.replace('│', '').replace('└── ', '')
@@ -423,9 +432,30 @@ class FileTree:  # def class, visible
 
         return subtree  # Return the new FileTree
 
+    def makedirs(self) -> None:
+        # Only process nodes without subfolders to improve performance
+        stack: deque[tuple[TreeNode, str]] = deque()  # Use a stack for tree traversal
+
+        stack.append((self.root_node, self.root_path)) # noqa
+
+        while stack:
+            current_node, current_path = stack.pop()
+
+            # If the current node has no subfolders and the path does not exist, create the directory
+            if not current_node.get_non_leaf_children() and not os.path.exists(current_path):
+                os.makedirs(current_path)
+
+            # Traverse child directories and continue processing
+            for child in current_node.get_non_leaf_children(): # noqa
+                child_path = os.path.join(current_path, child.get_name())
+                stack.append((child, child_path))
+
     def __repr__(self):
         # Generate a string representation of the FileTree for debugging purposes
         return f"Root Dir: {self.root_path}\n{self.root_node.to_repr(level=0)}" # noqa
+
+    def __del__(self):
+        self.root_node = None # DEREF the root_node and if it is no longer necessary, it will be recycled
 
     def to_str(self, tuple[int, int] depth = (0, 0)) -> str:
         # Generate a string representation of the FileTree with optional depth control.
@@ -443,7 +473,8 @@ class FileTree:  # def class, visible
         repr_content = "\n".join(lines[1:])
         root_node = TreeNode.from_repr(repr_content) # noqa
 
-        tree = FileTree(root_path) # noqa
+        tree = FileTree('.', ignore=['*'])  # noqa
+        tree.root_path = root_path
         tree.root_node = root_node
         return tree
 
@@ -490,7 +521,8 @@ class FileTree:  # def class, visible
 
         root_path: str = root_node.get_name() # noqa
 
-        tree = FileTree(root_path) # noqa
+        tree = FileTree('.', ignore=['*'])  # noqa
+        tree.root_path = root_path
         tree.root_node = root_node
         return tree
 
@@ -532,7 +564,8 @@ class FileTree:  # def class, visible
         if root_path is None:
             root_path = root_node.get_name()  # Use name of root node as path
 
-        tree = FileTree(root_path) # noqa
+        tree = FileTree('.', ignore=['*']) # noqa
+        tree.root_path = root_path
         tree.root_node = root_node
         return tree
 
